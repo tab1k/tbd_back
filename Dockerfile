@@ -1,14 +1,12 @@
-FROM python:3.11
-
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
 # Копируем и устанавливаем зависимости
-COPY tbd_back/requirements.txt .
+COPY ./tbd_back/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем весь код из папки src
-COPY tbd_back/src/ .
+COPY ./tbd_back/src/ .
 
 # Собираем статику для Django (если нужно)
 RUN python manage.py collectstatic --noinput
