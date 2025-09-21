@@ -11,12 +11,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем весь код из папки src
 COPY src/ .
 
-# Создаем директории для медиа файлов
-RUN mkdir -p media
+# Создаем директории
+RUN mkdir -p media staticfiles
 
-# Выполняем миграции и собираем статику
+# Устанавливаем переменную окружения для STATIC_ROOT
+ENV STATIC_ROOT=/app/staticfiles
+
+# Выполняем миграции
 RUN python manage.py migrate
-RUN python manage.py collectstatic --noinput
+
+# Собираем статику только если есть статические файлы
+RUN python manage.py collectstatic --noinput --clear || echo "No static files to collect"
 
 # Открываем порт
 EXPOSE 8000
