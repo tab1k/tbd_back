@@ -4,11 +4,11 @@ FROM python:3.11
 WORKDIR /app
 
 # Копируем и устанавливаем зависимости
-COPY backend/requirements.txt .
+COPY tbd_back/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь код из папки backend
-COPY backend/src/ .
+# Копируем весь код из папки src
+COPY tbd_back/src/ .
 
 # Собираем статику для Django (если нужно)
 RUN python manage.py collectstatic --noinput
