@@ -82,6 +82,9 @@ LANGUAGES = [
 
 USE_I18N = True
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

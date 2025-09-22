@@ -10,6 +10,9 @@ from admin_panel.serializers import *
 from .models import Requests
 from .serializers import *
 from main.models import *
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 class AdminPanelPageView(APIView):
@@ -28,7 +31,32 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all()
-    serializer_class = CaseSerializer
+    
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return CaseCreateUpdateSerializer
+        return CaseSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        case = serializer.save()
+        
+        # Возвращаем данные с изображениями
+        response_serializer = CaseSerializer(case)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        case = serializer.save()
+        
+        # Возвращаем обновленные данные
+        response_serializer = CaseSerializer(case)
+        return Response(response_serializer.data)
+
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
