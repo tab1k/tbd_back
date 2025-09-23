@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CaseImage, Video, Team, Case
+from .models import CaseImage, Logo, News, Video, Team, Case
 from admin_panel.models import Requests
 
 class VideoSerializer(serializers.ModelSerializer):
@@ -24,6 +24,30 @@ class CaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = ['id', 'title', 'description', 'images', 'created_at', 'updated_at']
+
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'description', 'image', 'created_at']
+
+
+class LogoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Logo
+        fields = ['id', 'title', 'image']
+
+
+class NewsCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'description', 'image', 'created_at']
+
+    def validate_image(self, value):
+        if value and value.size > 5 * 1024 * 1024:  # Ограничение на размер файла (5MB)
+            raise serializers.ValidationError("Изображение слишком большое")
+        return value
+
 
 class CaseCreateUpdateSerializer(serializers.ModelSerializer):
     # Добавляем поле для загрузки изображений при создании/обновлении

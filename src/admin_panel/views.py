@@ -13,6 +13,9 @@ from main.models import *
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import viewsets
+from main.models import News
+from main.serializers import NewsSerializer, NewsCreateUpdateSerializer
 
 
 class AdminPanelPageView(APIView):
@@ -28,6 +31,10 @@ class RequestViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+class LogoViewSet(viewsets.ModelViewSet):
+    queryset = Logo.objects.all()
+    serializer_class = LogoSerializer
 
 class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all()
@@ -56,7 +63,7 @@ class CaseViewSet(viewsets.ModelViewSet):
         # Возвращаем обновленные данные
         response_serializer = CaseSerializer(case)
         return Response(response_serializer.data)
-
+    
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
@@ -65,6 +72,41 @@ class TeamViewSet(viewsets.ModelViewSet):
 class VideoViewSet(viewsets.ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
+
+
+
+class NewsViewSet(viewsets.ModelViewSet):
+    queryset = News.objects.all()
+    serializer_class = NewsSerializer  # Сериализатор для получения данных
+
+    def get_serializer_class(self):
+        # Для create, update и partial_update используем NewsCreateUpdateSerializer
+        if self.action in ['create', 'update', 'partial_update']:
+            return NewsCreateUpdateSerializer
+        return NewsSerializer
+
+    def create(self, request, *args, **kwargs):
+        # При создании новости, используем сериализатор для создания
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        news = serializer.save()
+
+        # Возвращаем сериализованные данные после создания
+        response_serializer = NewsSerializer(news)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        # При обновлении новости, используем тот же подход, что и для create
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        news = serializer.save()
+
+        # Возвращаем сериализованные данные после обновления
+        response_serializer = NewsSerializer(news)
+        return Response(response_serializer.data)
+
 
 
 
