@@ -16,12 +16,21 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from main.models import News
 from main.serializers import NewsSerializer, NewsCreateUpdateSerializer
+from django.utils import timezone
+from django.db.models import Count
 
 
 class AdminPanelPageView(APIView):
     def get(self, request):
-        data = {"message": "Админка доступна"}
-        return Response(data)
+        stats = {
+            "requests": Requests.objects.count(),
+            "videos": Video.objects.count(),
+            "team_members": Team.objects.count(),
+            "cases": Case.objects.count(),
+            "news": News.objects.count(),
+            "logos": Logo.objects.count()
+        }
+        return Response(stats)
 
 
 class RequestViewSet(viewsets.ModelViewSet):

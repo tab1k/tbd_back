@@ -54,6 +54,8 @@ class News(models.Model):
     title = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(max_length=999, blank=True, null=True)
     image = models.ImageField(upload_to='news_photos/', blank=False, null=False)
+    
+    url = models.URLField(blank=True, null=True, verbose_name='Ссылка')
 
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 

@@ -29,8 +29,27 @@ class CaseSerializer(serializers.ModelSerializer):
 class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
-        fields = ['id', 'title', 'description', 'image', 'created_at']
+        fields = ['id', 'title', 'description', 'image', 'url', 'created_at']
 
+class NewsCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'description', 'image', 'url', 'created_at']
+        extra_kwargs = {
+            'image': {'required': False}, 
+            'url': {'required': False}, 
+        }
+
+    def validate_image(self, value):
+        if value and value.size > 5 * 1024 * 1024:  # Ограничение на размер файла (5MB)
+            raise serializers.ValidationError("Изображение слишком большое")
+        return value
+    
+    def update(self, instance, validated_data):
+        # Если изображение не передано, оставляем существующее
+        if 'image' not in validated_data or validated_data['image'] is None:
+            validated_data.pop('image', None)
+        return super().update(instance, validated_data)
 
 class LogoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,15 +57,7 @@ class LogoSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image']
 
 
-class NewsCreateUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = News
-        fields = ['id', 'title', 'description', 'image', 'created_at']
 
-    def validate_image(self, value):
-        if value and value.size > 5 * 1024 * 1024:  # Ограничение на размер файла (5MB)
-            raise serializers.ValidationError("Изображение слишком большое")
-        return value
 
 
 class CaseCreateUpdateSerializer(serializers.ModelSerializer):
