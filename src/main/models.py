@@ -20,6 +20,7 @@ class Video(models.Model):
 
 class Team(models.Model):
     name = models.CharField(verbose_name=_("Название"),max_length=100, blank=True, null=True)
+    description = models.TextField(max_length=350, blank=True, null=True)
     role = models.CharField(verbose_name=_("Роль"),max_length=100, blank=True, null=True)
     photo = models.ImageField(verbose_name=_("Фото"),upload_to='team_photos/', blank=True, null=True)
 

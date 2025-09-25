@@ -10,7 +10,7 @@ class VideoSerializer(serializers.ModelSerializer):
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ['id', 'name', 'role', 'photo']
+        fields = ['id', 'name', 'description',  'role', 'photo']
 
 
 class CaseImageSerializer(serializers.ModelSerializer):

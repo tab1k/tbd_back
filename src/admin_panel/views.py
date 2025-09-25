@@ -20,9 +20,11 @@ from django.utils import timezone
 from django.db.models import Count
 
 
+
 class AdminPanelPageView(APIView):
     def get(self, request):
         stats = {
+            "users" : User.objects.count(),
             "requests": Requests.objects.count(),
             "videos": Video.objects.count(),
             "team_members": Team.objects.count(),
