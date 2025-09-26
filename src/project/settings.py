@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'modeltranslation',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -85,7 +84,6 @@ SIMPLE_JWT = {
 LANGUAGES = [
     ('en', _('English')),
     ('ru', _('Russian')),
-    ('kk', _('Kazakh')), 
 ]
 
 USE_I18N = True

@@ -19,8 +19,6 @@ from main.serializers import NewsSerializer, NewsCreateUpdateSerializer
 from django.utils import timezone
 from django.db.models import Count
 
-
-
 class AdminPanelPageView(APIView):
     def get(self, request):
         stats = {
@@ -34,7 +32,6 @@ class AdminPanelPageView(APIView):
         }
         return Response(stats)
 
-
 class RequestViewSet(viewsets.ModelViewSet):
     queryset = Requests.objects.all()
     serializer_class = RequestSerializer
@@ -47,21 +44,55 @@ class LogoViewSet(viewsets.ModelViewSet):
     queryset = Logo.objects.all()
     serializer_class = LogoSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
+
 class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all()
     
     def get_serializer_class(self):
+        # Для создания и обновления
         if self.action in ['create', 'update', 'partial_update']:
             return CaseCreateUpdateSerializer
+        
+        # Для GET-запросов определяем по URL или другому критерию
+        if self.is_admin_request():
+            return CaseAdminSerializer
         return CaseSerializer
+
+    def is_admin_request(self):
+        """Определяем, является ли запрос админским"""
+        # Вариант 1: по пути URL
+        if hasattr(self.request, 'path') and '/admin-panel/' in self.request.path:
+            return True
+        
+        # Вариант 2: по заголовку или параметру
+        if self.request.query_params.get('admin') == 'true':
+            return True
+            
+        # Вариант 3: для всех запросов из админки (если она отдельно аутентифицирована)
+        # return self.request.user.is_staff  # если используете аутентификацию
+        
+        return False
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         case = serializer.save()
         
-        # Возвращаем данные с изображениями
-        response_serializer = CaseSerializer(case)
+        # Возвращаем данные с изображениями - используем правильный сериализатор для ответа
+        if self.is_admin_request():
+            response_serializer = CaseAdminSerializer(case, context=self.get_serializer_context())
+        else:
+            response_serializer = CaseSerializer(case, context=self.get_serializer_context())
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
@@ -71,56 +102,90 @@ class CaseViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         case = serializer.save()
         
-        # Возвращаем обновленные данные
-        response_serializer = CaseSerializer(case)
+        # Возвращаем обновленные данные - используем правильный сериализатор
+        if self.is_admin_request():
+            response_serializer = CaseAdminSerializer(case, context=self.get_serializer_context())
+        else:
+            response_serializer = CaseSerializer(case, context=self.get_serializer_context())
         return Response(response_serializer.data)
-    
+
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
-    serializer_class = TeamSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return TeamCreateUpdateSerializer
+        
+        if self.is_admin_request():
+            return TeamAdminSerializer
+        return TeamSerializer
+
+    def is_admin_request(self):
+        """Определяем, является ли запрос админским"""
+        if hasattr(self.request, 'path') and '/admin-panel/' in self.request.path:
+            return True
+        if self.request.query_params.get('admin') == 'true':
+            return True
+        return False
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        team_member = serializer.save()
+        
+        # Возвращаем данные с правильным сериализатором
+        if self.is_admin_request():
+            response_serializer = TeamAdminSerializer(team_member, context=self.get_serializer_context())
+        else:
+            response_serializer = TeamSerializer(team_member, context=self.get_serializer_context())
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        team_member = serializer.save()
+        
+        # Возвращаем обновленные данные
+        if self.is_admin_request():
+            response_serializer = TeamAdminSerializer(team_member, context=self.get_serializer_context())
+        else:
+            response_serializer = TeamSerializer(team_member, context=self.get_serializer_context())
+        return Response(response_serializer.data)
+
 
 class VideoViewSet(viewsets.ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
 
 
-
 class NewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.all()
-    serializer_class = NewsSerializer  # Сериализатор для получения данных
-
+    
     def get_serializer_class(self):
-        # Для create, update и partial_update используем NewsCreateUpdateSerializer
         if self.action in ['create', 'update', 'partial_update']:
             return NewsCreateUpdateSerializer
-        return NewsSerializer
-
-    def create(self, request, *args, **kwargs):
-        # При создании новости, используем сериализатор для создания
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        news = serializer.save()
-
-        # Возвращаем сериализованные данные после создания
-        response_serializer = NewsSerializer(news)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-
+        elif self.request.user.is_staff:
+            return NewsAdminSerializer
+        else:
+            return NewsSerializer
+    
     def update(self, request, *args, **kwargs):
-        # При обновлении новости, используем тот же подход, что и для create
-        partial = kwargs.pop('partial', False)
+        # Всегда используем partial=True для обновления
+        partial = True
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        news = serializer.save()
-
-        # Возвращаем сериализованные данные после обновления
-        response_serializer = NewsSerializer(news)
-        return Response(response_serializer.data)
-
-
-
-
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
 
 class RegisterView(APIView):
     def post(self, request):
@@ -133,7 +198,6 @@ class RegisterView(APIView):
         
         user = User.objects.create_user(username=username, password=password, email=email)
         return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
-
 
 class LoginView(APIView):
     def post(self, request):
@@ -148,7 +212,6 @@ class LoginView(APIView):
                 'refresh': str(refresh),
             })
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class TokenRefreshView(APIView):
     def post(self, request):
@@ -166,16 +229,15 @@ class TokenRefreshView(APIView):
         except Exception as e:
             return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class RequestView(APIView):
     def get(self, request):
-        requests = Requests.objects.all()  # Получаем все кейсы
-        serializer = RequestSerializer(requests, many=True)  # Преобразуем в JSON
+        requests = Requests.objects.all()
+        serializer = RequestSerializer(requests, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = RequestSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()  # Сохраняем заявку в базе данных
+            serializer.save()
             return Response({"message": "Заявка успешно отправлена!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
