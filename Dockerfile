@@ -17,14 +17,11 @@ RUN mkdir -p media staticfiles
 # Устанавливаем переменную окружения для STATIC_ROOT
 ENV STATIC_ROOT=/app/staticfiles
 
-# Выполняем миграции
-RUN python manage.py migrate
-
-# Собираем статику только если есть статические файлы
+# Собираем статику (это нормально в RUN)
 RUN python manage.py collectstatic --noinput --clear || echo "No static files to collect"
 
 # Открываем порт
 EXPOSE 8000
 
-# Запускаем Gunicorn для Django
+# Запускаем Gunicorn для Django (миграции будут в command в docker-compose)
 CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8000"]

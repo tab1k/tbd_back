@@ -114,39 +114,34 @@ class VideoSerializer(serializers.ModelSerializer):
 
 
 class LogoSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    
     class Meta:
         model = Logo
         fields = ['id', 'title', 'image']
+    
+    def get_title(self, obj):
+        # Определяем язык из запроса
+        language = self.context['request'].GET.get('lang', 'ru')
+        return obj.title(language)
 
 
-# serializers.py
 class TeamSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     
     def get_name(self, obj):
-        request = self.context.get('request')
-        if request and hasattr(request, 'GET'):
-            language = request.GET.get('lang', 'ru')
-        else:
-            language = 'ru'
+        # Получаем язык из контекста, который передается из API view
+        language = self.context.get('language', 'ru')
         return obj.name(language)
     
     def get_description(self, obj):
-        request = self.context.get('request')
-        if request and hasattr(request, 'GET'):
-            language = request.GET.get('lang', 'ru')
-        else:
-            language = 'ru'
+        language = self.context.get('language', 'ru')
         return obj.description(language)
     
     def get_role(self, obj):
-        request = self.context.get('request')
-        if request and hasattr(request, 'GET'):
-            language = request.GET.get('lang', 'ru')
-        else:
-            language = 'ru'
+        language = self.context.get('language', 'ru')
         return obj.role(language)
     
     class Meta:
