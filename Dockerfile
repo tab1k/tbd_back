@@ -4,6 +4,11 @@ FROM python:3.11
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
+# Устанавливаем системные зависимости для PostgreSQL
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 # Копируем и устанавливаем зависимости
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -17,11 +22,8 @@ RUN mkdir -p media staticfiles
 # Устанавливаем переменную окружения для STATIC_ROOT
 ENV STATIC_ROOT=/app/staticfiles
 
-# Собираем статику (это нормально в RUN)
-RUN python manage.py collectstatic --noinput --clear || echo "No static files to collect"
-
 # Открываем порт
 EXPOSE 8000
 
-# Запускаем Gunicorn для Django (миграции будут в command в docker-compose)
+# Запускаем Gunicorn для Django
 CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8000"]

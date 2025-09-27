@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-xq6@=vr+sovw=6%xrc7#t3&ovn@j9)tx13y4-8r9m8k8g^(h$5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '0.0.0.0', 'localhost', '192.168.31.99', 'https://75e80fc3f1ad.ngrok-free.app', 'http://192.168.0.13:8000']
+ALLOWED_HOSTS = ['*', '0.0.0.0', 'localhost', '192.168.31.99', 'https://75e80fc3f1ad.ngrok-free.app', 'http://192.168.0.13:8000', '127.0.0.1', 'backend', '85.116.187.153']
 
 
 # Application definition
@@ -60,8 +60,8 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://tbds-q8l41pfg0-tab1ks-projects.vercel.app',
-    'https://tbds.vercel.app',
+    "http://localhost:8585",
+    "http://85.116.187.153:8585",
     'http://localhost:5173',
 ]
 
@@ -137,13 +137,18 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'tbd_db',
-        'USER': 'tab1k',
-        'PASSWORD': 'TOBI8585',
-        'HOST': 'db', 
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'tbd_db'),
+        'USER': os.getenv('DB_USER', 'tab1k'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'TOBI8585'),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'CONN_MAX_AGE': 60,
+        'OPTIONS': {
+            'connect_timeout': 30,
+        }
     }
 }
+
 
 
 # Password validation
