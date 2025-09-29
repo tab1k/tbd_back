@@ -18,6 +18,10 @@ from main.models import News
 from main.serializers import NewsSerializer, NewsCreateUpdateSerializer
 from django.utils import timezone
 from django.db.models import Count
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 class AdminPanelPageView(APIView):
     def get(self, request):
@@ -212,6 +216,29 @@ class LoginView(APIView):
                 'refresh': str(refresh),
             })
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Если используете JWT токены
+        try:
+            refresh_token = request.data.get("refresh_token")
+            # Здесь может быть логика добавления токена в blacklist
+            # если вы используете JWT blacklist
+        except Exception:
+            pass
+        
+        # Удаляем токен из клиента
+        response = Response({"detail": "Successfully logged out."}, 
+                          status=status.HTTP_200_OK)
+        
+        # Если вы храните токен в cookies
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        
+        return response
 
 class TokenRefreshView(APIView):
     def post(self, request):
@@ -229,15 +256,3 @@ class TokenRefreshView(APIView):
         except Exception as e:
             return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
 
-class RequestView(APIView):
-    def get(self, request):
-        requests = Requests.objects.all()
-        serializer = RequestSerializer(requests, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, *args, **kwargs):
-        serializer = RequestSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Заявка успешно отправлена!"}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

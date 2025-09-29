@@ -16,6 +16,7 @@ router.register(r'logo', LogoViewSet)
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'), 
     path('', AdminPanelPageView.as_view(), name='admin_panel'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-] + router.urls  # Добавляем маршруты из роутера
+] + router.urls

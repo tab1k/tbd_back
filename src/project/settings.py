@@ -35,14 +35,6 @@ ALLOWED_HOSTS = ['*', '0.0.0.0', 'localhost', '192.168.31.99', 'https://75e80fc3
 # Application definition
 
 INSTALLED_APPS = [
-    
-    # "unfold",  # before django.contrib.admin
-    # "unfold.contrib.filters",  # optional, if special filters are needed
-    # "unfold.contrib.forms",  # optional, if special form elements are needed
-    # "unfold.contrib.inlines",  # optional, if special inlines are needed
-    # "unfold.contrib.import_export",  # optional, if django-import-export package is used
-    # "unfold.contrib.constance",  # optional, if django-constance package is used
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -70,6 +62,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
     ],
 }
 
@@ -126,28 +121,28 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'tbd_db'),
-        'USER': os.getenv('DB_USER', 'tab1k'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'TOBI8585'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        'CONN_MAX_AGE': 60,
-        'OPTIONS': {
-            'connect_timeout': 30,
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('DB_NAME', 'tbd_db'),
+#         'USER': os.getenv('DB_USER', 'tab1k'),
+#         'PASSWORD': os.getenv('DB_PASSWORD', 'TOBI8585'),
+#         'HOST': os.getenv('DB_HOST', 'db'),
+#         'PORT': os.getenv('DB_PORT', '5432'),
+#         'CONN_MAX_AGE': 60,
+#         'OPTIONS': {
+#             'connect_timeout': 30,
+#         }
+#     }
+# }
 
 
 
