@@ -54,18 +54,18 @@ INSTALLED_APPS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8585",
     "http://85.116.187.153:8585",
-    'http://localhost:5173',
-    "http://tbd.bz:8585",
-    "http://www.tbd.bz:8585",
+    'http://localhost',
+    "http://tbd.bz",
+    "http://www.tbd.bz",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://tbd.bz:8585',
-    'http://www.tbd.bz:8585',
-    'http://85.116.187.153:8585',
-    'http://localhost:8585',
+    'http://tbd.bz',
+    'http://www.tbd.bz',
+    'http://85.116.187.153',
+    'http://localhost',
 ]
 
 USE_X_FORWARDED_HOST = True
