@@ -1,27 +1,28 @@
+import logging
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.db.models import Count
+from django.utils import timezone
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import status
-from rest_framework.response import Response
-from django.contrib.auth.models import User
-from rest_framework import viewsets
-from main.models import *
-from main.serializers import *
+
 from admin_panel.serializers import *
+from main.models import *
+from main.models import News
+from main.serializers import *
+from main.serializers import NewsCreateUpdateSerializer, NewsSerializer
+
 from .models import Requests
 from .serializers import *
-from main.models import *
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import viewsets
-from main.models import News
-from main.serializers import NewsSerializer, NewsCreateUpdateSerializer
-from django.utils import timezone
-from django.db.models import Count
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+
+
+logger = logging.getLogger(__name__)
 
 class AdminPanelPageView(APIView):
     def get(self, request):
@@ -39,6 +40,40 @@ class AdminPanelPageView(APIView):
 class RequestViewSet(viewsets.ModelViewSet):
     queryset = Requests.objects.all()
     serializer_class = RequestSerializer
+
+    def perform_create(self, serializer):
+        request_instance = serializer.save()
+        self._notify_about_request(request_instance)
+
+    def _notify_about_request(self, request_instance):
+        recipients = getattr(settings, 'REQUEST_NOTIFICATION_RECIPIENTS', [])
+        if not recipients:
+            logger.warning('REQUEST_NOTIFICATION_RECIPIENTS is empty; skipping notification email')
+            return
+
+        created_at = request_instance.created_at
+        if created_at:
+            created_at = timezone.localtime(created_at)
+
+        subject = f"Новая заявка: {request_instance.name}"
+        message_lines = [
+            "Получена новая заявка на сайте TBD.",
+            "",
+            f"Имя: {request_instance.name}",
+            f"Телефон: {request_instance.phone}",
+        ]
+
+        if created_at:
+            message_lines.append(f"Создана: {created_at.strftime('%d.%m.%Y %H:%M')}")
+
+        message = "\n".join(message_lines)
+
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None)
+
+        try:
+            send_mail(subject, message, from_email, recipients, fail_silently=False)
+        except Exception:
+            logger.exception('Failed to send request notification email')
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -255,4 +290,3 @@ class TokenRefreshView(APIView):
             })
         except Exception as e:
             return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
-

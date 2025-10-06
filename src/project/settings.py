@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-xq6@=vr+sovw=6%xrc7#t3&ovn@j9)tx13y4-8r9m8k8g^(h$5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '0.0.0.0', 'localhost', '192.168.31.99', 'https://75e80fc3f1ad.ngrok-free.app', 'http://192.168.0.13:8000', '127.0.0.1', 'backend', '85.116.187.153']
+ALLOWED_HOSTS = ['*', 'tbd.bz', 'www.tbd.bz', '0.0.0.0', 'localhost', '192.168.31.99', 'http://192.168.0.13:8000', '127.0.0.1', 'backend', '85.116.187.153']
 
 
 # Application definition
@@ -55,9 +55,21 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8585",
     "http://85.116.187.153:8585",
     'http://localhost:5173',
+    "http://tbd.bz:8585",
+    "http://www.tbd.bz:8585",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://tbd.bz:8585',
+    'http://www.tbd.bz:8585',
+    'http://85.116.187.153:8585',
+    'http://localhost:8585',
+]
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'http')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -191,3 +203,24 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'true').lower() == 'true'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'false').lower() == 'true'
+
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError('EMAIL_USE_TLS and EMAIL_USE_SSL cannot both be True')
+
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no-reply@tbd.bz')
+
+REQUEST_NOTIFICATION_RECIPIENTS = [
+    'nhuseynzade@gmail.com',
+    'yulianakim@tbd.bz',
+    'tbd@tbd.bz',
+    'marinali@tbd.bz',
+]
