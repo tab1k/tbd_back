@@ -52,20 +52,27 @@ INSTALLED_APPS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8585",
-    "http://85.116.187.153:8585",
-    'http://localhost',
+    "https://tbd.bz",
+    "https://www.tbd.bz",
+    "https://back.tbd.bz",
     "http://tbd.bz",
     "http://www.tbd.bz",
+    "http://localhost",
+    "http://localhost:8585",
+    "http://85.116.187.153:8585",
+    "http://85.116.187.153",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'http://tbd.bz',
     'http://www.tbd.bz',
     'http://85.116.187.153',
     'http://localhost',
+    'https://tbd.bz',
+    'https://www.tbd.bz',
+    'https://back.tbd.bz',
 ]
 
 USE_X_FORWARDED_HOST = True
@@ -95,8 +102,16 @@ LANGUAGES = [
 
 USE_I18N = True
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 12485760  # 10MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 12485760
+DEFAULT_UPLOAD_LIMIT_MB = 50
+try:
+    MAX_UPLOAD_SIZE_MB = int(os.getenv('MAX_UPLOAD_SIZE_MB', DEFAULT_UPLOAD_LIMIT_MB))
+except (TypeError, ValueError):
+    MAX_UPLOAD_SIZE_MB = DEFAULT_UPLOAD_LIMIT_MB
+
+MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024  # Convert MB to bytes
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_BYTES
+FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_BYTES
 
 
 MIDDLEWARE = [
