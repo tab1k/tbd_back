@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-xq6@=vr+sovw=6%xrc7#t3&ovn@j9)tx13y4-8r9m8k8g^(h$5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'tbd.bz', 'www.tbd.bz', '0.0.0.0', 'localhost', '192.168.31.99', 'http://192.168.0.13:8000', '127.0.0.1', 'backend', '85.116.187.153']
+ALLOWED_HOSTS = ['*', 'tbd.bz', 'www.tbd.bz', '0.0.0.0', 'localhost', '192.168.31.99', 'backend.tbd.bz', '127.0.0.1', 'backend', '85.116.187.153']
 
 
 # Application definition
