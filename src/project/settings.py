@@ -102,7 +102,7 @@ LANGUAGES = [
 
 USE_I18N = True
 
-DEFAULT_UPLOAD_LIMIT_MB = 50
+DEFAULT_UPLOAD_LIMIT_MB = 100
 try:
     MAX_UPLOAD_SIZE_MB = int(os.getenv('MAX_UPLOAD_SIZE_MB', DEFAULT_UPLOAD_LIMIT_MB))
 except (TypeError, ValueError):
@@ -117,6 +117,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE_BYTES
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -209,6 +210,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MAX_AGE = 60 * 60 * 24 * 365
 
 
 MEDIA_URL = '/media/'
